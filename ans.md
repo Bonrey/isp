@@ -1,56 +1,40 @@
+### Control Flow Graph
+
+| matplotlib | base  |
+|:---|:---|
+| ![CFG_plt](cfg4.png) | ![CFG](diagram_cfg.png) |
+
+### Dominator Tree
+
+| matplotlib | handmade  |
+|:---|:---|
+| ![DT_plt](dt5.png) | ![DT](diagram_dt.png) |
+
+| node=      | Entry   | A        | B           | C           | D           | E           | Exit              |
+|:-----------|:--------|:---------|:------------|:------------|:------------|:------------|:------------------|
+| Pred(node) | None    | Entry, E | A           | A           | B, C        | C, D        | E                 |
+| Dom(node)  | Entry   | Entry, A | Entry, A, B | Entry, A, C | Entry, A, D | Entry, A, E | Entry, A, E, Exit |
+| Idom(node) | None    | Entry    | A           | A           | A           | A           | E                 |
+| DF(node)   | None    | A        | D           | D, E        | E           | A           | None              |
+
+```code
+B = {B} + (Dom(A)) = {B} + ({A}) = {A, B}
+C = {C} + (Dom(A)) = {C} + ({A}) = {A, C}
+D = {D} + (Dom(B) * Dom(C)) = {D} + ({A, B} * {A, C}) = {A, D}
+E = {E} + (Dom(C) * Dom(D)) = {E} + ({A, C} * {A, D}) = {A, E}
+===========================
+A = {A} + (Dom(E)) = {A} + ({A, E}) = {A, E}
+B = {B} + (Dom(A)) = {B} + ({A, E}) = {A, E, B}
+C = {C} + (Dom(A)) = {C} + ({A, E}) = {A, E, C}
+D = {D} + (Dom(B) * Dom(C)) = {D} + ({A, B, E} * {A, C, E}) = {A, E, D}
+E = {E} + (Dom(C) * Dom(D)) = {E} + ({A, C, E} * {A, D, E}) = {A, E}
+IDoms: (A, -), (B, A), (C, A), (D, A), (E, A)
+
+Pred(D) = {B, C}, IDom(D) = {A}
+B -> A: DF(B) += {D}
+C -> A: DF(C) += {D}
+Pred(E) = {C, D}, IDom(E) = {A}
+C -> A: DF(C) += {E}
+D -> A: DF(D) += {E}
+Boundaries: (A: {A}), (B: {D}), (C: {D, E}), (D: {E}), (E: {})
 ```
-Entry
-
-Block A (4)
-(1) 	param p
-(2) 	param q
-(3) 	param r
-(4) 	q0 <-- #0
-
-Block B (1)
-(5) 	L1: ifTrue q0 >= p goto L2
-
-Block C (14)
-(6) 	q0 <-- +, q0,  r
-(7) 	q1 <-- +, p,   q
-(8) 	r  <-- *, r,  #2
-(9) 	q2 <-- +, p,   q
-(10)	q0 <-- +, p,  #1
-(11)	q2 <-- +, q0,  r
-(12)	s  <-- +, q2,  q
-(13)	s  <-- +,  s,  q
-(14)	q2 <-- +, p,   q
-(15)	q3 <-- -, q2, q1
-(16)	q3 <-- -, q2, q3
-(17)	q3 <-- +,  p,  q
-(18)	q1 <-- -, q3,  s
-(19)	ifTrue q < #256 goto L1
-
-Block D (5)
-(20)	q3 <-- +, q0, q1
-(21)	s  <-- +, q2, q3
-(22)	p  <-- -, s,  p
-(23)	r  <-- -, r,  #256
-(24)	goto L1
-
-Block E (2)
-(25)	L2: q <-- *, p,   q
-(26)	return q
-
-Exit
-```
-
-Control Flow Graph
-
-![CFG](cfg/1.png)
-
-Dominator Tree
-
-![DT](dt/1.png)
-
-| node=      | A    | B       | C       | D          | E       |
-|:-----------|:-----|:--------|:--------|:-----------|:--------|
-| Pred(node) | None | A, C, D | B       | C          | B       |
-| Dom(node)  | A    | A, B    | A, B, C | A, B, C, D | A, B, E |
-| Idom(node) | None | A       | B       | C          | B       |
-| DF(node)   | None | B       | B       | B          | None    |

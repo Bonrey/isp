@@ -109,7 +109,7 @@ def dfs(edges, start, visited=None):
 
 
 def draw(edges, dir_name):
-    for i in range(10):
+    for i in range(100):
         G = nx.DiGraph()
         G.add_edges_from(edges)
         options = {
@@ -169,22 +169,22 @@ def show_blocks(blocks):
     print()
 
 
-def parse_edges():
-    n = len(blocks)
-    lables = {}
-    for i in range(n):
-        line = blocks[i][0]
-        if line[0] == 'L':
-            lables[line[1]] = chr(ord('A') + i)
-    edges = [[] for _ in range(len(blocks))]
-    for i in range(n):
-        line = blocks[i][-1]
-        if 'goto' in line:
-            edges[i].append(lables[re.findall(r'goto\s*L\d', line)[-1][-1]])
-        if 'if' in line or 'goto' not in line:
-            if i < n - 1:
-                edges[i].append(chr(ord('A') + i + 1))
-    return edges
+#def parse_edges():
+#    n = len(blocks)
+#    lables = {}
+#    for i in range(n):
+#        line = blocks[i][0]
+#        if line[0] == 'L':
+#            lables[line[1]] = chr(ord('A') + i)
+#    edges = [[] for _ in range(len(blocks))]
+#    for i in range(n):
+#        line = blocks[i][-1]
+#        if 'goto' in line:
+#            edges[i].append(lables[re.findall(r'goto\s*L\d', line)[-1][-1]])
+#        if 'if' in line or 'goto' not in line:
+#            if i < n - 1:
+#                edges[i].append(chr(ord('A') + i + 1))
+#    return edges
 
 
 if __name__ == '__main__':
@@ -192,35 +192,26 @@ if __name__ == '__main__':
     f = open('ans.md', 'w')
     sys.stdout = f
     # data1
-    # nodes = ['A', 'B', 'C', 'D', 'E']
-    # edges = [['B', 'E'], ['C'], ['C', 'D'], ['B', 'E'], []]
-
-    # data2
-    # nodes = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10']
-    # edges = [['B2', 'B3'], ['B3'], ['B4'], ['B3', 'B5', 'B6'], ['B7'], ['B7'], ['B4', 'B8'],
-    #         ['B3', 'B9', 'B10'], ['B1'], ['B7']]
-
-    # data3
-    # nodes = ['B0', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7']
-    # edges = [['B1'], ['B2', 'B3'], ['B7'], ['B4', 'B5'], ['B6'], ['B6'], ['B7'], ['B1']]
-    nodes = []
-    edges = []
-    with open("input.txt", 'r') as code:
-        blocks = parse(code.read())
-        show_blocks(blocks)
-        nodes += [chr(ord('A') + i) for i in range(len(blocks))]
-        edges += parse_edges()
-        with open("graph.txt", "w") as fout:
-            fout.write(str(nodes) + '\n\n')
-            for n in edges:
-                fout.write(str(n) + '\n')
+    nodes = ['Entry', 'A', 'B', 'C', 'D', 'E', 'Exit']
+    edges = [['A'], ['B', 'C'], ['D'], ['D', 'E'], ['E'], ['A', 'Exit'], []]
+    # nodes = []
+    # edges = []
+    # with open("input.txt", 'r') as code:
+    #    blocks = parse(code.read())
+    #    show_blocks(blocks)
+    #    nodes += [chr(ord('A') + i) for i in range(len(blocks))]
+    #    edges += parse_edges()
+    #    with open("graph.txt", "w") as fout:
+    #        fout.write(str(nodes) + '\n\n')
+    #        for n in edges:
+    #            fout.write(str(n) + '\n')
 
     draw(normal_edges(nodes, edges), "cfg")
     print("### Control Flow Graph")
     print()
     table = "| matplotlib | handmade  |\n|:---|:---|"
     print(table)
-    print("| ![CFG](cfg/1.png) " * 2 + '|')
+    print("| ![CFG_plt](cfg/1.png) | ![CFG](cfg/diagram_dt.png) |")
     print()
     graph = Graph(nodes, edges)
     graph.dom()
@@ -230,7 +221,7 @@ if __name__ == '__main__':
     print("### Dominator Tree")
     print()
     print(table)
-    print("| ![DT](dt/1.png) " * 2 + '|')
+    print("| ![DT_plt](dt/1.png) | ![DT](dt/diagram_dt.png) |")
     print()
     graph.df()
     print(graph.get_table().to_markdown(index=False))
