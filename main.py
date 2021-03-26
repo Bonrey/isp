@@ -210,20 +210,27 @@ if __name__ == '__main__':
         show_blocks(blocks)
         nodes += [chr(ord('A') + i) for i in range(len(blocks))]
         edges += parse_edges()
+        with open("graph.txt", "w") as fout:
+            fout.write(str(nodes) + '\n\n')
+            for n in edges:
+                fout.write(str(n) + '\n')
 
     draw(normal_edges(nodes, edges), "cfg")
-    print("Control Flow Graph")
+    print("### Control Flow Graph")
     print()
-    print("![CFG](cfg/1.png)")
+    table = "| matplotlib | handmade  |\n|:---|:---|"
+    print(table)
+    print("| ![CFG](cfg/1.png) " * 2 + '|')
     print()
     graph = Graph(nodes, edges)
     graph.dom()
     graph.idom()
     graph.pred()
     draw(normal_edges(nodes, graph.dom_tree()), "dt")
-    print("Dominator Tree")
+    print("### Dominator Tree")
     print()
-    print("![DT](dt/1.png)")
+    print(table)
+    print("| ![DT](dt/1.png) " * 2 + '|')
     print()
     graph.df()
     print(graph.get_table().to_markdown(index=False))
