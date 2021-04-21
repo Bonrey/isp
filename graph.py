@@ -24,18 +24,18 @@ class Graph:
         self.dfs = [set() for _ in range(self._N)]
         self.df()
         self.dom_edges = [set() for _ in range(self._N)]
-        draw(normal_edges(nodes, self.dom_tree()), "dt", "### Dominator Tree")
+        draw(normal_edges(nodes, self.dom_tree()), "dt", "Dominator Tree")
         print(self.get_table().to_markdown(index=False))
 
     def dom(self):
-        for taboo in range(1, self._N):
+        for taboo in tqdm.tqdm(range(1, self._N), desc="Dom", ncols=100, colour='green'):
             availables = self._components(taboo)
             for i in range(self._N):
                 if not availables[i]:
                     self.doms[i].add(taboo)
 
     def idom(self):
-        for n in range(self._N):
+        for n in tqdm.tqdm(range(self._N), desc="IDom", ncols=100, colour='green'):
             for i in self.doms[n]:
                 flag = (i != n)
                 for m in range(self._N):
@@ -45,12 +45,12 @@ class Graph:
                     self.idoms[n] = i
 
     def pred(self):
-        for i in range(self._N):
+        for i in tqdm.tqdm(range(self._N), desc="Pred", ncols=100, colour='green'):
             for node in self.edges[i]:
                 self.preds[node].add(i)
 
     def df(self):
-        for i in range(self._N):
+        for i in tqdm.tqdm(range(self._N), desc="Dominance Frontier", ncols=100, colour='green'):
             if len(self.preds[i]) > 1:
                 for pred in self.preds[i]:
                     curr_pred = pred
@@ -69,7 +69,7 @@ class Graph:
         return dfs(edges, 0)
 
     def dom_tree(self):
-        for i in range(self._N):
+        for i in tqdm.tqdm(range(self._N), desc="Dom Tree", ncols=100, colour='green'):
             if self.idoms[i] is not None:
                 self.dom_edges[self.idoms[i]].add(i)
         edges = []
@@ -82,7 +82,7 @@ class Graph:
         columns = ["node="] + self._keys
         table = []
         dict = vars(self)
-        for key in ['Pred', 'Dom', 'Idom', 'DF']:
+        for key in tqdm.tqdm(['Pred', 'Dom', 'Idom', 'DF'], desc="Table", ncols=100, colour='green'):
             row = [key + '(node)']
             if key == 'Idom':
                 for i in range(self._N):

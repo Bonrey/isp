@@ -1,5 +1,6 @@
 import os
 import re
+import tqdm
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -70,10 +71,12 @@ def parse(code):
     return blocks
 
 
-def draw(edges, dir_name, title, copys=10):
+def draw(edges, dir_name, title):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-    for i in range(copys):
+    styles = [nx.draw_networkx, nx.draw_circular, nx.draw_kamada_kawai, nx.draw_random, nx.draw_spectral,
+              nx.draw_spring, nx.draw_shell, nx.draw_planar]
+    for style in tqdm.tqdm(styles, desc=title, ncols=100, colour='green'):
         G = nx.DiGraph()
         G.add_edges_from(edges)
         options = {
@@ -82,14 +85,17 @@ def draw(edges, dir_name, title, copys=10):
             'width': 3,
             'arrowstyle': '->',
             'arrowsize': 12,
+            'with_labels': True,
+            'arrows': True
         }
-        nx.draw_networkx(G, arrows=True, **options)
-        plt.savefig(os.path.join(dir_name, f"{i}.png"))
+        style(G, **options)
+        # nx.draw_circular(G, **options)
+        plt.savefig(os.path.join(dir_name, f"{str(style).split()[1]}.png"))
         plt.close()
-    print(title)
+    print("###", title)
     print()
     print("| matplotlib | handmade  |\n|:---|:---|")
-    print(f"| ![{dir_name.upper()}_plt](../{dir_name}/1.png) | ![CFG](../{dir_name}/diagram_{dir_name}.png) |")
+    print(f"| ![{dir_name.upper()}_plt](../{dir_name}/draw_planar.png) | ![CFG](../{dir_name}/diagram_{dir_name}.png) |")
     print()
 
 

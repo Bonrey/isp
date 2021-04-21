@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # edges = [['A'], ['B', 'C'], ['D'], ['D', 'E'], ['E'], ['A', 'Exit'], []]
     nodes = []
     edges = []
-    with open("input.txt", 'r') as code:
+    with open("input/input_1.txt", 'r') as code:
         blocks = parse(code.read())
         show_blocks(blocks)
         nodes += ['Entry'] + [chr(ord('A') + i) for i in range(len(blocks) - 2)] + ['Exit']
@@ -24,7 +24,7 @@ if __name__ == '__main__':
             for n in edges:
                 fout.write(str(n) + '\n')
 
-    draw(normal_edges(nodes, edges), "cfg", "### Control Flow Graph")
+    draw(normal_edges(nodes, edges), "cfg", "Control Flow Graph")
     graph = Graph(nodes, edges)
     sys.stdout = orig_stdout
     f.close()
