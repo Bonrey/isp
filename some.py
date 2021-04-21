@@ -1,5 +1,7 @@
 import os
 import re
+
+import pandas as pd
 import tqdm
 
 import networkx as nx
@@ -17,12 +19,13 @@ def show_blocks(blocks):
             print(borders[iscode + 1])
             iscode += 1
         else:
-            print('Block {} ({})'.format(letter, len(block)))
+            print('Block {} [{}]'.format(letter, len(block)))
             letter = chr(ord(letter) + 1)
             for line in block:
                 print('({}){}\t{}'.format(line_num, ' ' if line_num < 10 else '', line))
                 line_num += 1
-        print()
+        if iscode < 1:
+            print()
     print("```")
     print()
 
@@ -71,7 +74,7 @@ def parse(code):
     return blocks
 
 
-def draw(edges, dir_name, title):
+def draw(edges, dir_name, title, default='planar', is_table=False):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     styles = [nx.draw_networkx, nx.draw_circular, nx.draw_kamada_kawai, nx.draw_random, nx.draw_spectral,
@@ -89,20 +92,88 @@ def draw(edges, dir_name, title):
             'arrows': True
         }
         style(G, **options)
-        # nx.draw_circular(G, **options)
         plt.savefig(os.path.join(dir_name, f"{str(style).split()[1]}.png"))
         plt.close()
     print("###", title)
     print()
-    print("| matplotlib | handmade  |\n|:---|:---|")
-    print(f"| ![{dir_name.upper()}_plt](../{dir_name}/draw_planar.png) | ![CFG](../{dir_name}/diagram_{dir_name}.png) |")
+    if is_table:
+        print("| matplotlib | handmade  |\n|:---|:---|")
+        print(f"| ![{dir_name.upper()}_plt](../{dir_name}/draw_{default}.png) "
+              f"| ![{dir_name.upper()}](../{dir_name}/diagram_{dir_name}.png) |")
+    else:
+        print(f"![{dir_name.upper()}_plt](../{dir_name}/draw_{default}.png)")
     print()
 
 
-def normal_edges(nodes, edges):
+def normal_edges(nodes, edges, available=None):
     n_edges = []
     for i in range(len(nodes)):
-        for node in edges[i]:
-            n_edges.append((nodes[i], node))
-    n_edges += [('Entry', nodes[0]), (nodes[-1], 'Exit')]
+        if not available or available[i]:
+            for node in edges[i]:
+                n_edges.append((nodes[i], node))
     return n_edges
+
+
+def dfs(edges, start, visited=None):
+    if visited is None:
+        visited = [False] * len(edges)
+    visited[start] = True
+    for next in edges[start]:
+        if not visited[next]:
+            dfs(edges, next, visited)
+    return visited
+
+
+def globals_blocks(nodes, code_blocks, available):
+    globs = set()
+    blocks = {}
+    for node in tqdm.tqdm(range(len(nodes)), desc="Globals & Blocks", ncols=100, colour='green'):
+        if available[node]:
+            def_block = set()
+            for line in code_blocks[node]:
+                commands = line.split()
+                i = 0
+                changed = set()
+                used = set()
+                is_changed = True
+                while i < len(commands):
+                    if commands[i][0] == 'L' or \
+                            ((commands[i] == 'goto' or commands[i] == 'param') and i + 1 < len(commands)):
+                        pass
+                    elif len(commands[i]) >= len('ifTrue') and commands[i][:2] == 'if' and i + 2 < len(commands):
+                        is_changed = False
+                    elif (commands[i] == '<--' or commands[i] == 'return') and i + 1 < len(commands):
+                        is_changed = False
+                    elif commands[i][0].islower():
+                        var = commands[i]
+                        if var[-1] == ',':
+                            var = var[:-1]
+                        if var not in blocks:
+                            blocks[var] = set()
+                        if is_changed:
+                            changed.add(var)
+                        else:
+                            used.add(var)
+                    else:
+                        pass
+                    i += 1
+                for var in used:
+                    if var not in def_block:
+                        globs.add(var)
+                for var in changed:
+                    def_block.add(var)
+                    blocks[var].add(nodes[node])
+    print("Global variables : ```{" + ', '.join(sorted(globs)) + "}```")
+    print()
+    columns = ["var ="] + sorted(blocks)
+    table = []
+    row = ["Blocks(var)"]
+    for var in columns[1:]:
+        if blocks[var]:
+            row.append(', '.join(sorted(blocks[var])))
+        else:
+            row.append('None')
+    table.append(row)
+    print(pd.DataFrame(table, columns=columns).to_markdown(index=False))
+    print()
+    return globs, blocks
