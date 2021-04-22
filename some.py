@@ -75,8 +75,8 @@ def parse(code):
 
 
 def draw(edges, dir_name, title, default='planar', is_table=False):
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    if not os.path.exists(os.path.join("output", dir_name)):
+        os.makedirs(os.path.join("output", dir_name))
     styles = [nx.draw_networkx, nx.draw_circular, nx.draw_kamada_kawai, nx.draw_random, nx.draw_spectral,
               nx.draw_spring, nx.draw_shell, nx.draw_planar]
     for style in tqdm.tqdm(styles, desc=title, ncols=100, colour='green'):
@@ -92,16 +92,16 @@ def draw(edges, dir_name, title, default='planar', is_table=False):
             'arrows': True
         }
         style(G, **options)
-        plt.savefig(os.path.join(dir_name, f"{str(style).split()[1]}.png"))
+        plt.savefig(os.path.join("output", dir_name, f"{str(style).split()[1]}.png"))
         plt.close()
     print("###", title)
     print()
     if is_table:
         print("| matplotlib | handmade  |\n|:---|:---|")
-        print(f"| ![{dir_name.upper()}_plt](../{dir_name}/draw_{default}.png) "
-              f"| ![{dir_name.upper()}](../{dir_name}/diagram_{dir_name}.png) |")
+        print(f"| ![{dir_name.upper()}_plt]({dir_name}/draw_{default}.png) "
+              f"| ![{dir_name.upper()}]({dir_name}/diagram_{dir_name}.png) |")
     else:
-        print(f"![{dir_name.upper()}_plt](../{dir_name}/draw_{default}.png)")
+        print(f"![{dir_name.upper()}_plt]({dir_name}/draw_{default}.png)")
     print()
 
 
@@ -130,26 +130,33 @@ def parse_vars(code_line):
     changed = set()
     used = set()
     is_changed = True
+    new_line = []
     while i < len(commands):
-        if commands[i][0] == 'L' or \
-                ((commands[i] == 'goto' or commands[i] == 'param') and i + 1 < len(commands)):
-            pass
+        if commands[i][0] == 'L' or (commands[i] == 'goto' and i + 1 < len(commands)):
+            new_line.append(commands[i])
         elif len(commands[i]) >= len('ifTrue') and commands[i][:2] == 'if' and i + 2 < len(commands):
             is_changed = False
-        elif (commands[i] == '<--' or commands[i] == 'return') and i + 1 < len(commands):
+            new_line.append(commands[i])
+        elif (commands[i] == '<--' or commands[i] == 'return' or commands[i] == 'param') and i + 1 < len(commands):
             is_changed = False
+            new_line.append(commands[i])
         elif commands[i][0].islower():
             var = commands[i]
+            command = [is_changed, -1, False]
             if var[-1] == ',':
                 var = var[:-1]
+                command[-1] = True
             if is_changed:
                 changed.add(var)
+                command[1] = list(changed).index(var)
             else:
                 used.add(var)
+                command[1] = list(used).index(var)
+            new_line.append(command)
         else:
-            pass
+            new_line.append(commands[i])
         i += 1
-    return used, changed
+    return used, changed, new_line
 
 
 def show_set(st, title):
@@ -160,3 +167,8 @@ def show_set(st, title):
 def show_table(table):
     print(pd.DataFrame(table[0], columns=table[1]).to_markdown(index=False))
     print()
+
+
+def sub(num):
+    sub_chars = "₀₁₂₃₄₅₆₇₈₉"
+    return ''.join([sub_chars[int(i)] for i in str(num)])

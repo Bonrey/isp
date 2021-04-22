@@ -15,7 +15,7 @@ if __name__ == '__main__':
     # edges = [['A'], ['B', 'C'], ['D'], ['D', 'E'], ['E'], ['A', 'Exit'], []]
     nodes = []
     edges = []
-    with open("input/input_1.txt", 'r') as code:
+    with open("input/input_2.txt", 'r') as code:
         code_blocks = parse(code.read())
         show_blocks(code_blocks)
         nodes += ['Entry'] + [chr(ord('A') + i) for i in range(len(code_blocks) - 2)] + ['Exit']
