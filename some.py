@@ -2,7 +2,6 @@ import os
 import re
 
 import pandas as pd
-import tqdm
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -79,7 +78,7 @@ def draw(edges, dir_name, title, default='planar', is_table=False):
         os.makedirs(os.path.join("output", dir_name))
     styles = [nx.draw_networkx, nx.draw_circular, nx.draw_kamada_kawai, nx.draw_random, nx.draw_spectral,
               nx.draw_spring, nx.draw_shell, nx.draw_planar]
-    for style in tqdm.tqdm(styles, desc=title, ncols=100, colour='green'):
+    for style in styles:
         G = nx.DiGraph()
         G.add_edges_from(edges)
         options = {
@@ -172,3 +171,9 @@ def show_table(table):
 def sub(num):
     sub_chars = "₀₁₂₃₄₅₆₇₈₉"
     return ''.join([sub_chars[int(i)] for i in str(num)])
+
+
+def show_phi(args, phi):
+    var = phi + sub(args[0])
+    params = [phi + sub(idx) for idx in args[1]]
+    return f"{var} <-- phi({', '.join(params)})"

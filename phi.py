@@ -8,18 +8,24 @@ class Phi:
         self.nodes = nodes
         self.graph = graph
         self.code_blocks = copy.deepcopy(code_blocks)
+        for i in range(len(nodes)):
+            if not graph.available[i]:
+                self.code_blocks[i] = ["pass"]
         self.globs = set()
         self.blocks = {}
         show_table(self.globals_blocks())
         show_set(self.globs, "Global variables")
         self.phis = [set() for _ in range(self.graph.N)]
         self.locate()
+        self.phis = [{var: [0, []] for var in sorted(self.phis[block])} for block in range(self.graph.N)]
         # print(self.phis)
         self.counter = {var: 0 for var in self.globs}
         self.stack = {var: [] for var in self.globs}
         print("```")
         self.rename(0)
         print("```")
+        self.add_phi()
+        show_blocks(self.code_blocks)
 
     def new_name(self, var):
         idx = self.counter[var]
@@ -28,7 +34,7 @@ class Phi:
         return idx
 
     def globals_blocks(self):
-        for node in tqdm.tqdm(range(len(self.nodes)), desc="Globals & Blocks", ncols=100, colour='green'):
+        for node in range(len(self.nodes)):
             if self.graph.available[node]:
                 def_block = set()
                 for line in self.code_blocks[node]:
@@ -54,7 +60,7 @@ class Phi:
         return table, columns
 
     def locate(self):
-        for var in tqdm.tqdm(self.globs, desc="Locate phi functions", ncols=100, colour='green'):
+        for var in self.globs:
             work_list = list(self.blocks[var])
             item = 0
             n = len(work_list)
@@ -75,8 +81,8 @@ class Phi:
         else:
             print((tabs + 1) * tab_str + 'rename phi-functions')
             for phi in self.phis[block]:
-                var = self.new_name(phi)
-                ...
+                self.phis[block][phi][0] = self.new_name(phi)
+                print((tabs + 2) * tab_str + show_phi(self.phis[block][phi], phi))
         has_instructions = False
         for line in self.code_blocks[block]:
             used, changed, new_line = parse_vars(line)
@@ -106,12 +112,26 @@ class Phi:
                             var += ','
                         new_line[i] = var
                 print((tabs + 2) * tab_str + ' '.join(new_line))
-            new_block.append(''.join(new_line))
+            for i in range(len(new_line)):
+                if type(new_line[i]) is list and not new_line[i][0]:
+                    var = list(used)[new_line[i][1]]
+                    if new_line[i][-1]:
+                        var += ','
+                    new_line[i] = var
+            new_block.append(' '.join(new_line))
         if not has_instructions:
             print((tabs + 1) * tab_str + 'no instructions')
         for successor in self.graph.edges[block]:
             print((tabs + 1) * tab_str + f'fill({self.nodes[successor]})')
-            ...
+            if not self.phis[successor]:
+                print((tabs + 1) * tab_str + 'no phi-functions')
+            else:
+                print((tabs + 1) * tab_str + 'rename phi-functions')
+                for phi in self.phis[successor]:
+                    if not self.stack[phi]:
+                        self.new_name(phi)
+                    self.phis[successor][phi][1].append(self.stack[phi][-1])
+                    print((tabs + 2) * tab_str + show_phi(self.phis[successor][phi], phi))
         for successor in self.graph.dom_edges[block]:
             self.rename(successor, tabs + 1)
         if not self.phis[block]:
@@ -127,5 +147,14 @@ class Phi:
                 if not has_instructions:
                     has_instructions = True
                     print((tabs + 1) * tab_str + 'pop for each instructions')
-                for var in changed:
+                for var in changed.intersection(self.globs):
                     self.stack[var].pop()
+        self.code_blocks[block] = new_block
+
+    def add_phi(self):
+        for block in range(self.graph.N):
+            if self.phis[block]:
+                new_block = []
+                for phi in self.phis[block]:
+                    new_block.append(show_phi(self.phis[block][phi], phi))
+                self.code_blocks[block] = new_block + self.code_blocks[block]

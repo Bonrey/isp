@@ -31,7 +31,7 @@ class Graph:
         show_table(self.get_table())
 
     def dom(self):
-        for taboo in tqdm.tqdm(range(1, self.N), desc="Dom", ncols=100, colour='green'):
+        for taboo in range(1, self.N):
             if self.available[taboo]:
                 availables = self._components(taboo)
                 for i in range(self.N):
@@ -39,7 +39,7 @@ class Graph:
                         self.doms[i].add(taboo)
 
     def idom(self):
-        for n in tqdm.tqdm(range(self.N), desc="IDom", ncols=100, colour='green'):
+        for n in range(self.N):
             if self.available[n]:
                 for i in self.doms[n]:
                     flag = (i != n)
@@ -50,13 +50,13 @@ class Graph:
                         self.idoms[n] = i
 
     def pred(self):
-        for i in tqdm.tqdm(range(self.N), desc="Pred", ncols=100, colour='green'):
+        for i in range(self.N):
             if self.available[i]:
                 for node in self.edges[i]:
                     self.preds[node].add(i)
 
     def df(self):
-        for i in tqdm.tqdm(range(self.N), desc="Dominance Frontier", ncols=100, colour='green'):
+        for i in range(self.N):
             if self.available[i]:
                 if len(self.preds[i]) > 1:
                     for pred in self.preds[i]:
@@ -76,7 +76,7 @@ class Graph:
         return dfs(edges, 0)
 
     def dom_tree(self):
-        for i in tqdm.tqdm(range(self.N), desc="Dom Tree", ncols=100, colour='green'):
+        for i in range(self.N):
             if self.idoms[i] is not None:
                 self.dom_edges[self.idoms[i]].add(i)
         edges = []
@@ -92,7 +92,7 @@ class Graph:
                 columns.append(self.keys[i])
         table = []
         _dict = vars(self)
-        for key in tqdm.tqdm(['Pred', 'Dom', 'Idom', 'DF'], desc="Table", ncols=100, colour='green'):
+        for key in ['Pred', 'Dom', 'Idom', 'DF']:
             row = [key + '(node)']
             for i in range(self.N):
                 if self.available[i]:
