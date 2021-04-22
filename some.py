@@ -124,56 +124,39 @@ def dfs(edges, start, visited=None):
     return visited
 
 
-def globals_blocks(nodes, code_blocks, available):
-    globs = set()
-    blocks = {}
-    for node in tqdm.tqdm(range(len(nodes)), desc="Globals & Blocks", ncols=100, colour='green'):
-        if available[node]:
-            def_block = set()
-            for line in code_blocks[node]:
-                commands = line.split()
-                i = 0
-                changed = set()
-                used = set()
-                is_changed = True
-                while i < len(commands):
-                    if commands[i][0] == 'L' or \
-                            ((commands[i] == 'goto' or commands[i] == 'param') and i + 1 < len(commands)):
-                        pass
-                    elif len(commands[i]) >= len('ifTrue') and commands[i][:2] == 'if' and i + 2 < len(commands):
-                        is_changed = False
-                    elif (commands[i] == '<--' or commands[i] == 'return') and i + 1 < len(commands):
-                        is_changed = False
-                    elif commands[i][0].islower():
-                        var = commands[i]
-                        if var[-1] == ',':
-                            var = var[:-1]
-                        if var not in blocks:
-                            blocks[var] = set()
-                        if is_changed:
-                            changed.add(var)
-                        else:
-                            used.add(var)
-                    else:
-                        pass
-                    i += 1
-                for var in used:
-                    if var not in def_block:
-                        globs.add(var)
-                for var in changed:
-                    def_block.add(var)
-                    blocks[var].add(nodes[node])
-    print("Global variables : ```{" + ', '.join(sorted(globs)) + "}```")
-    print()
-    columns = ["var ="] + sorted(blocks)
-    table = []
-    row = ["Blocks(var)"]
-    for var in columns[1:]:
-        if blocks[var]:
-            row.append(', '.join(sorted(blocks[var])))
+def parse_vars(code_line):
+    commands = code_line.split()
+    i = 0
+    changed = set()
+    used = set()
+    is_changed = True
+    while i < len(commands):
+        if commands[i][0] == 'L' or \
+                ((commands[i] == 'goto' or commands[i] == 'param') and i + 1 < len(commands)):
+            pass
+        elif len(commands[i]) >= len('ifTrue') and commands[i][:2] == 'if' and i + 2 < len(commands):
+            is_changed = False
+        elif (commands[i] == '<--' or commands[i] == 'return') and i + 1 < len(commands):
+            is_changed = False
+        elif commands[i][0].islower():
+            var = commands[i]
+            if var[-1] == ',':
+                var = var[:-1]
+            if is_changed:
+                changed.add(var)
+            else:
+                used.add(var)
         else:
-            row.append('None')
-    table.append(row)
-    print(pd.DataFrame(table, columns=columns).to_markdown(index=False))
+            pass
+        i += 1
+    return used, changed
+
+
+def show_set(st, title):
+    print(title, ": ```{" + ', '.join(sorted(st)) + "}```")
     print()
-    return globs, blocks
+
+
+def show_table(table):
+    print(pd.DataFrame(table[0], columns=table[1]).to_markdown(index=False))
+    print()

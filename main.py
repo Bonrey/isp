@@ -1,6 +1,7 @@
 import sys
 
 from graph import Graph
+from phi import Phi
 from some import *
 
 if __name__ == '__main__':
@@ -20,6 +21,7 @@ if __name__ == '__main__':
         nodes += ['Entry'] + [chr(ord('A') + i) for i in range(len(code_blocks) - 2)] + ['Exit']
         edges += parse_edges(code_blocks)
     graph = Graph(nodes, edges)
-    globs, blocks = globals_blocks(nodes, code_blocks, graph.available)
+    phi = Phi(code_blocks, nodes, graph)
+
     sys.stdout = orig_stdout
     f.close()
