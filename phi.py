@@ -38,6 +38,9 @@ class Phi:
         idx = self.counter[var]
         self.counter[var] += 1
         self.stack[var].append(idx)
+        print('```')
+        show_table(self.stack_table())
+        print('```')
         return idx
 
     def globals_blocks(self):
@@ -174,8 +177,10 @@ class Phi:
         for successor in self.graph.dom_edges[block]:
             self.rename(successor, tabs + 1)
             print((tabs + 2) * self.tab_str + f'return to {self.nodes[block]};')
-        show_table(self.stack_table())
         self.clean(block, tabs)
+        print('```')
+        show_table(self.stack_table())
+        print('```')
         self.code_blocks[block] = new_block
 
     def add_phi(self):
