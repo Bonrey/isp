@@ -30,10 +30,12 @@ Block E [2]
 Exit
 ```
 
+[('Entry', 'A'), ('A', 'E'), ('A', 'B'), ('B', 'D'), ('B', 'C'), ('C', 'C'), ('C', 'D'), ('D', 'B'), ('D', 'E'), ('E', 'Exit')]
 ### Control Flow Graph
 
 ![CFG_plt](cfg/draw_planar.png)
 
+[('Entry', 'A'), ('A', 'B'), ('A', 'E'), ('B', 'C'), ('B', 'D'), ('E', 'Exit')]
 ### Dominator Tree
 
 ![DT_plt](dt/draw_planar.png)
@@ -115,18 +117,18 @@ Exit-block:
 | is Global   | True       | True    | True | False |
 
 ```
-variable c:
-	WorkList : {A}
-variable b:
-	WorkList : {B, D, E}
-	insert phi(*b) in B-block
-	insert phi(*b) in E-block
 variable a:
 	WorkList : {B, C, D, E}
 	insert phi(*a) in B-block
 	insert phi(*a) in E-block
 	insert phi(*a) in C-block
 	insert phi(*a) in D-block
+variable b:
+	WorkList : {B, D, E}
+	insert phi(*b) in B-block
+	insert phi(*b) in E-block
+variable c:
+	WorkList : {A}
 ```
 
 ### Needs a phi-function:
@@ -172,7 +174,7 @@ Rename(Entry):
                 rename phi-functions:
                     a_3 <-- phi(a_2)
                 rename instructions:
-                    L2: a_4 <-- +, b_2, b_2
+                    L2: a_4 <-- +, a_3, b_2
                 fill(C):
                     a_3 <-- phi(a_2, a_4)
                 fill(D):
@@ -183,7 +185,7 @@ Rename(Entry):
                 rename phi-functions:
                     a_5 <-- phi(a_2, a_4)
                 rename instructions:
-                    L3: a_6 <-- +, b_2, b_2
+                    L3: a_6 <-- +, a_5, b_2
                     b_3 <-- -, 1, a_6
                 fill(B):
                     a_1 <-- phi(a_0, a_6)
@@ -200,8 +202,8 @@ Rename(Entry):
                 a_7 <-- phi(a_0, a_6)
                 b_4 <-- phi(b_0, b_3)
             rename instructions:
-                L4: a_8 <-- +, c_0, c_0
-                b_5 <-- +, b_4, b_4
+                L4: a_8 <-- +, a_7, c_0
+                b_5 <-- +, a_8, b_4
             fill(Exit):
                 no phi-functions
             Rename(Exit):
@@ -236,20 +238,20 @@ Block B [5]
 
 Block C [3]
 (12)	L2: a_3 <-- phi(a_2, a_4)
-(13)	a_4 <-- +, b_2, b_2
+(13)	a_4 <-- +, a_3, b_2
 (14)	ifTrue #flag goto L2
 
 Block D [4]
 (15)	L3: a_5 <-- phi(a_2, a_4)
-(16)	a_6 <-- +, b_2, b_2
+(16)	a_6 <-- +, a_5, b_2
 (17)	b_3 <-- -, 1, a_6
 (18)	ifTrue #flag goto L1
 
 Block E [4]
 (19)	L4: a_7 <-- phi(a_0, a_6)
 (20)	b_4 <-- phi(b_0, b_3)
-(21)	a_8 <-- +, c_0, c_0
-(22)	b_5 <-- +, b_4, b_4
+(21)	a_8 <-- +, a_7, c_0
+(22)	b_5 <-- +, a_8, b_4
 
 Exit
 ```

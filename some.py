@@ -110,6 +110,7 @@ def normal_edges(nodes, edges, available=None):
         if not available or available[i]:
             for node in edges[i]:
                 n_edges.append((nodes[i], node))
+    print(n_edges)
     return n_edges
 
 
