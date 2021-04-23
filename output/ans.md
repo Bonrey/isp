@@ -61,94 +61,94 @@ Detached blocks : ```{D, G}```
 | Blocks(var) | None | A, E | A, C, E | A, C, E | None | B     |
 | is Global   | True | True | True    | True    | True | False |
 
-### Needs a phi-function:
+### Needs a φ-function:
 
 | block =   | Entry   | A   | B   | C   | D   | E   | F   | G   | H   | Exit   |
 |:----------|:--------|:----|:----|:----|:----|:----|:----|:----|:----|:-------|
-| n         | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
-| k         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
+| a         | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
 | b         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
 | c         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
-| a         | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
+| k         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
+| n         | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
 | t1        | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
 
 ```
 Rename(Entry):
-    no phi-functions
+    no φ-functions
     no instructions
     fill(A):
-        no phi-functions
+        no φ-functions
     Rename(A):
-        no phi-functions
+        no φ-functions
         rename instructions:
             k₀ <-- n₀
             b₀ <-- #1
             c₀ <-- a₀
             ifTrue k₀ = #0 goto L4
         fill(H):
-            no phi-functions
+            no φ-functions
         fill(B):
-            b₀ <-- phi(b₀)
-            c₀ <-- phi(c₀)
-            k₀ <-- phi(k₀)
+            b₀ <-- φ(b₀)
+            c₀ <-- φ(c₀)
+            k₀ <-- φ(k₀)
         Rename(H):
-            no phi-functions
+            no φ-functions
             rename instructions:
                 L4: return c₀
             fill(Exit):
-                no phi-functions
+                no φ-functions
             Rename(Exit):
-                no phi-functions
+                no φ-functions
                 no instructions
                 clean();
                 return to H;
             clean();
             return to A;
         Rename(B):
-            rename phi-functions:
-                b₁ <-- phi(b₀)
-                c₁ <-- phi(c₀)
-                k₁ <-- phi(k₀)
+            rename φ-functions:
+                b₁ <-- φ(b₀)
+                c₁ <-- φ(c₀)
+                k₁ <-- φ(k₀)
             rename instructions:
                 L1: t1 <-- %mod, k₁, #2
             fill(E):
-                no phi-functions
+                no φ-functions
             fill(C):
-                no phi-functions
+                no φ-functions
             Rename(C):
-                no phi-functions
+                no φ-functions
                 rename instructions:
                     k₂ <-- %div, k₁, #2
                     c₂ <-- *, c₁, c₁
                 fill(F):
-                    b₀ <-- phi(b₁)
-                    c₀ <-- phi(c₂)
-                    k₀ <-- phi(k₂)
+                    b₀ <-- φ(b₁)
+                    c₀ <-- φ(c₂)
+                    k₀ <-- φ(k₂)
                 clean();
                 return to B;
             Rename(E):
-                no phi-functions
+                no φ-functions
                 rename instructions:
                     L2: k₃ <-- -, k₁, #1
                     k₄ <-- %div, k₃, #2
                     c₃ <-- *, c₁, c₁
-                    b₂ <-- *, c₃, c₃
+                    b₂ <-- *, b₁, c₃
                 fill(F):
-                    b₀ <-- phi(b₁, b₂)
-                    c₀ <-- phi(c₂, c₃)
-                    k₀ <-- phi(k₂, k₄)
+                    b₀ <-- φ(b₁, b₂)
+                    c₀ <-- φ(c₂, c₃)
+                    k₀ <-- φ(k₂, k₄)
                 clean();
                 return to B;
             Rename(F):
-                rename phi-functions:
-                    b₃ <-- phi(b₁, b₂)
-                    c₄ <-- phi(c₂, c₃)
-                    k₅ <-- phi(k₂, k₄)
+                rename φ-functions:
+                    b₃ <-- φ(b₁, b₂)
+                    c₄ <-- φ(c₂, c₃)
+                    k₅ <-- φ(k₂, k₄)
                 no instructions
                 fill(B):
-                    b₁ <-- phi(b₀, b₃)
-                    c₁ <-- phi(c₀, c₄)
-                    k₁ <-- phi(k₀, k₅)
+                    b₁ <-- φ(b₀, b₃)
+                    c₁ <-- φ(c₀, c₄)
+                    k₁ <-- φ(k₀, k₅)
                 clean();
                 return to B;
             clean();
@@ -168,9 +168,9 @@ Block A [4]
 (4) 	ifTrue k₀ = #0 goto L4
 
 Block B [5]
-(5) 	L1: b₁ <-- phi(b₀, b₃)
-(6) 	c₁ <-- phi(c₀, c₄)
-(7) 	k₁ <-- phi(k₀, k₅)
+(5) 	L1: b₁ <-- φ(b₀, b₃)
+(6) 	c₁ <-- φ(c₀, c₄)
+(7) 	k₁ <-- φ(k₀, k₅)
 (8) 	t1 <-- %mod, k₁, #2
 (9) 	ifFalse t1 = #0 goto L2
 
@@ -186,12 +186,12 @@ Block E [4]
 (14)	L2: k₃ <-- -, k₁, #1
 (15)	k₄ <-- %div, k₃, #2
 (16)	c₃ <-- *, c₁, c₁
-(17)	b₂ <-- *, c₃, c₃
+(17)	b₂ <-- *, b₁, c₃
 
 Block F [4]
-(18)	L3: b₃ <-- phi(b₁, b₂)
-(19)	c₄ <-- phi(c₂, c₃)
-(20)	k₅ <-- phi(k₂, k₄)
+(18)	L3: b₃ <-- φ(b₁, b₂)
+(19)	c₄ <-- φ(c₂, c₃)
+(20)	k₅ <-- φ(k₂, k₄)
 (21)	goto L1
 
 Block G [1]

@@ -15,6 +15,7 @@ class Phi:
         self.blocks = {}
         show_table(self.globals_blocks())
         # show_set(self.globs, "Global variables")
+        self.phi_char = 'φ'  # "phi"
         self.phi_args = [set() for _ in range(self.graph.N)]
         self.locate()
         show_table(self.table_new_phi())
@@ -81,12 +82,12 @@ class Phi:
 
     def rename_phi(self, block, tabs):
         if not self.phis[block]:
-            print((tabs + 1) * self.tab_str + 'no phi-functions')
+            print((tabs + 1) * self.tab_str + f'no {self.phi_char}-functions')
         else:
-            print((tabs + 1) * self.tab_str + 'rename phi-functions:')
+            print((tabs + 1) * self.tab_str + f'rename {self.phi_char}-functions:')
             for phi in self.phis[block]:
                 self.phis[block][phi][0] = self.new_name(phi)
-                print((tabs + 2) * self.tab_str + show_phi(self.phis[block][phi], phi))
+                print((tabs + 2) * self.tab_str + show_phi(self.phis[block][phi], phi, self.phi_char))
 
     def rename_instructions(self, block, tabs):
         new_block = []
@@ -133,14 +134,14 @@ class Phi:
     def fill(self, successor, tabs):
         print((tabs + 1) * self.tab_str + f'fill({self.nodes[successor]}):')
         if not self.phis[successor]:
-            print((tabs + 2) * self.tab_str + 'no phi-functions')
+            print((tabs + 2) * self.tab_str + f'no {self.phi_char}-functions')
         else:
             # print((tabs + 1) * tab_str + 'rename phi-functions')
             for phi in self.phis[successor]:
                 if not self.stack[phi]:
                     self.new_name(phi)
                 self.phis[successor][phi][1].append(self.stack[phi][-1])
-                print((tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi))
+                print((tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi, self.phi_char))
 
     def rename(self, block, tabs=0):
         new_block = []
@@ -160,7 +161,7 @@ class Phi:
             if self.phis[block]:
                 new_block = []
                 for phi in self.phis[block]:
-                    new_block.append(show_phi(self.phis[block][phi], phi))
+                    new_block.append(show_phi(self.phis[block][phi], phi, self.phi_char))
                 if self.code_blocks[block] and self.code_blocks[block][0][0] == 'L':
                     first_line = self.code_blocks[block][0].split(': ')
                     new_block[0] = first_line[0] + ': ' + new_block[0]
@@ -170,7 +171,7 @@ class Phi:
     def table_new_phi(self):
         columns = ["block ="] + self.nodes
         table = []
-        for var in self.blocks:
+        for var in sorted(self.blocks):
             row = [var]
             for i in range(len(self.nodes)):
                 if var in self.phi_args[i]:
@@ -178,7 +179,7 @@ class Phi:
                 else:
                     row.append(' - ')
             table.append(row)
-        return table, columns, "Needs a phi-function:"
+        return table, columns, f"Needs a {self.phi_char}-function:"
 
     def clean(self, block, tabs):
         print((tabs + 1) * self.tab_str + 'clean();')

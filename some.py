@@ -176,7 +176,7 @@ def sub(num):
     return ''.join([sub_chars[int(i)] for i in str(num)])
 
 
-def show_phi(args, phi):
+def show_phi(args, phi, phi_char):
     var = phi + sub(args[0])
     params = [phi + sub(idx) for idx in args[1]]
-    return f"{var} <-- phi({', '.join(params)})"
+    return f"{var} <-- {phi_char}({', '.join(params)})"
