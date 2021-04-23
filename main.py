@@ -5,6 +5,9 @@ from phi import Phi
 from some import *
 
 if __name__ == '__main__':
+    input_file = "input/input_2.txt"
+    if len(sys.argv) > 0:
+        input_file = sys.argv[1]
     out_dir = "output"
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -15,7 +18,7 @@ if __name__ == '__main__':
     # edges = [['A'], ['B', 'C'], ['D'], ['D', 'E'], ['E'], ['A', 'Exit'], []]
     nodes = []
     edges = []
-    with open("input/input_1.txt", 'r') as code:
+    with open(input_file, 'r') as code:
         code_blocks = parse(code.read())
         show_blocks(code_blocks)
         nodes += ['Entry'] + [chr(ord('A') + i) for i in range(len(code_blocks) - 2)] + ['Exit']
