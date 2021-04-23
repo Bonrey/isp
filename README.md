@@ -1,3 +1,3 @@
 ```
-python3 main.py path/to/file
+python3 main.py path/to/file -ascii
 ```

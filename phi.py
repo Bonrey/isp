@@ -4,9 +4,13 @@ from some import *
 
 
 class Phi:
-    def __init__(self, code_blocks, nodes, graph):
+    def __init__(self, code_blocks, nodes, graph, is_ascii):
         self.nodes = nodes
         self.graph = graph
+        self.phi_char = "phi"
+        self.is_ascii = is_ascii
+        if not self.is_ascii:
+            self.phi_char = 'φ'
         self.code_blocks = copy.deepcopy(code_blocks)
         for i in range(len(nodes)):
             if not graph.available[i]:
@@ -15,7 +19,6 @@ class Phi:
         self.blocks = {}
         show_table(self.globals_blocks())
         # show_set(self.globs, "Global variables")
-        self.phi_char = "phi"  # 'φ'
         self.phi_args = [set() for _ in range(self.graph.N)]
         self.locate()
         show_table(self.table_new_phi())
@@ -104,7 +107,7 @@ class Phi:
             print((tabs + 1) * self.tab_str + f'rename {self.phi_char}-functions:')
             for phi in self.phis[block]:
                 self.phis[block][phi][0] = self.new_name(phi)
-                print((tabs + 2) * self.tab_str + show_phi(self.phis[block][phi], phi, self.phi_char))
+                print((tabs + 2) * self.tab_str + show_phi(self.phis[block][phi], phi, self.phi_char, self.is_ascii))
 
     def rename_instructions(self, block, tabs):
         new_block = []
@@ -123,7 +126,7 @@ class Phi:
                                 idx = self.new_name(var)
                             else:
                                 idx = self.stack[var][-1]
-                            var = var + sub(idx)
+                            var = var + sub(idx, self.is_ascii)
                         if new_line[i][-1]:
                             var += ','
                         new_line[i] = var
@@ -132,7 +135,7 @@ class Phi:
                         var = list(changed)[new_line[i][1]]
                         if var in self.globs:
                             idx = self.new_name(var)
-                            var = var + sub(idx)
+                            var = var + sub(idx, self.is_ascii)
                         if new_line[i][-1]:
                             var += ','
                         new_line[i] = var
@@ -158,7 +161,7 @@ class Phi:
                 if not self.stack[phi]:
                     self.new_name(phi)
                 self.phis[successor][phi][1].append(self.stack[phi][-1])
-                print((tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi, self.phi_char))
+                print((tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi, self.phi_char, self.is_ascii))
 
     def rename(self, block, tabs=0):
         new_block = []
@@ -178,7 +181,7 @@ class Phi:
             if self.phis[block]:
                 new_block = []
                 for phi in self.phis[block]:
-                    new_block.append(show_phi(self.phis[block][phi], phi, self.phi_char))
+                    new_block.append(show_phi(self.phis[block][phi], phi, self.phi_char, self.is_ascii))
                 if self.code_blocks[block] and self.code_blocks[block][0][0] == 'L':
                     first_line = self.code_blocks[block][0].split(': ')
                     new_block[0] = first_line[0] + ': ' + new_block[0]

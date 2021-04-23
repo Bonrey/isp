@@ -174,12 +174,14 @@ def show_table(table):
     print()
 
 
-def sub(num):
+def sub(num, is_ascii):
+    if is_ascii:
+        return f'_{num}'
     sub_chars = "₀₁₂₃₄₅₆₇₈₉"
     return ''.join([sub_chars[int(i)] for i in str(num)])
 
 
-def show_phi(args, phi, phi_char):
-    var = phi + sub(args[0])
-    params = [phi + sub(idx) for idx in args[1]]
+def show_phi(args, phi, phi_char, is_ascii):
+    var = phi + sub(args[0], is_ascii)
+    params = [phi + sub(idx, is_ascii) for idx in args[1]]
     return f"{var} <-- {phi_char}({', '.join(params)})"
