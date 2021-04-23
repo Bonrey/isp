@@ -14,7 +14,7 @@ class Phi:
         self.globs = set()
         self.blocks = {}
         show_table(self.globals_blocks())
-        show_set(self.globs, "Global variables")
+        # show_set(self.globs, "Global variables")
         self.phi_args = [set() for _ in range(self.graph.N)]
         self.locate()
         show_table(self.table_new_phi())
@@ -59,6 +59,10 @@ class Phi:
                 row.append(', '.join(sorted([self.graph.keys[block] for block in self.blocks[var]])))
             else:
                 row.append('None')
+        table.append(row)
+        row = ["is Global"]
+        for var in columns[1:]:
+            row.append(var in self.globs)
         table.append(row)
         return table, columns
 
@@ -166,14 +170,15 @@ class Phi:
     def table_new_phi(self):
         columns = ["block ="] + self.nodes
         table = []
-        row = [" + "]
-        for i in range(len(self.nodes)):
-            if self.phi_args[i]:
-                row.append(', '.join(sorted([f"phi(*{phi_arg})" for phi_arg in self.phi_args[i]])))
-            else:
-                row.append('None')
-        table.append(row)
-        return table, columns
+        for var in self.blocks:
+            row = [var]
+            for i in range(len(self.nodes)):
+                if var in self.phi_args[i]:
+                    row.append(' + ')
+                else:
+                    row.append(' - ')
+            table.append(row)
+        return table, columns, "Needs a phi-function:"
 
     def clean(self, block, tabs):
         print((tabs + 1) * self.tab_str + 'clean();')

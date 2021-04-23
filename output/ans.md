@@ -56,15 +56,21 @@ Detached blocks : ```{D, G}```
 | Idom(node) | None    | Entry    | A           | B              | B              | B              | A           | H                 |
 | DF(node)   | None    | None     | B           | F              | F              | B              | None        | None              |
 
-| var =       | a    | b    | c       | k       | n    | t1   |
-|:------------|:-----|:-----|:--------|:--------|:-----|:-----|
-| Blocks(var) | None | A, E | A, C, E | A, C, E | None | B    |
+| var =       | a    | b    | c       | k       | n    | t1    |
+|:------------|:-----|:-----|:--------|:--------|:-----|:------|
+| Blocks(var) | None | A, E | A, C, E | A, C, E | None | B     |
+| is Global   | True | True | True    | True    | True | False |
 
-Global variables : ```{a, b, c, k, n}```
+### Needs a phi-function:
 
-| block =   | Entry   | A    | B                         | C    | D    | E    | F                         | G    | H    | Exit   |
-|:----------|:--------|:-----|:--------------------------|:-----|:-----|:-----|:--------------------------|:-----|:-----|:-------|
-| +         | None    | None | phi(*b), phi(*c), phi(*k) | None | None | None | phi(*b), phi(*c), phi(*k) | None | None | None   |
+| block =   | Entry   | A   | B   | C   | D   | E   | F   | G   | H   | Exit   |
+|:----------|:--------|:----|:----|:----|:----|:----|:----|:----|:----|:-------|
+| n         | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
+| k         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
+| b         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
+| c         | -       | -   | +   | -   | -   | -   | +   | -   | -   | -      |
+| a         | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
+| t1        | -       | -   | -   | -   | -   | -   | -   | -   | -   | -      |
 
 ```
 Rename(Entry):
@@ -126,7 +132,7 @@ Rename(Entry):
                     L2: k₃ <-- -, k₁, #1
                     k₄ <-- %div, k₃, #2
                     c₃ <-- *, c₁, c₁
-                    b₂ <-- *, b₁, c₃
+                    b₂ <-- *, c₃, c₃
                 fill(F):
                     b₀ <-- phi(b₁, b₂)
                     c₀ <-- phi(c₂, c₃)
@@ -180,7 +186,7 @@ Block E [4]
 (14)	L2: k₃ <-- -, k₁, #1
 (15)	k₄ <-- %div, k₃, #2
 (16)	c₃ <-- *, c₁, c₁
-(17)	b₂ <-- *, b₁, c₃
+(17)	b₂ <-- *, c₃, c₃
 
 Block F [4]
 (18)	L3: b₃ <-- phi(b₁, b₂)

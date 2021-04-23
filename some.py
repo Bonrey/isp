@@ -164,6 +164,9 @@ def show_set(st, title):
 
 
 def show_table(table):
+    if len(table) > 2:
+        print("###", table[2])
+        print()
     print(pd.DataFrame(table[0], columns=table[1]).to_markdown(index=False))
     print()
 
