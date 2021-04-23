@@ -161,7 +161,8 @@ class Phi:
                 if not self.stack[phi]:
                     self.new_name(phi)
                 self.phis[successor][phi][1].append(self.stack[phi][-1])
-                print((tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi, self.phi_char, self.is_ascii))
+                print(
+                    (tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi, self.phi_char, self.is_ascii))
 
     def rename(self, block, tabs=0):
         new_block = []
@@ -173,6 +174,7 @@ class Phi:
         for successor in self.graph.dom_edges[block]:
             self.rename(successor, tabs + 1)
             print((tabs + 2) * self.tab_str + f'return to {self.nodes[block]};')
+        show_table(self.stack_table())
         self.clean(block, tabs)
         self.code_blocks[block] = new_block
 
@@ -213,3 +215,22 @@ class Phi:
                     has_instructions = True
                 for var in changed.intersection(self.globs):
                     self.stack[var].pop()
+
+    def stack_table(self):
+        columns = ["vars ="] + list(self.globs)
+        table = []
+        row = ["counter"]
+        max_stack = 0
+        for var in self.counter:
+            row.append(self.counter[var])
+            if max_stack < len(self.stack[var]):
+                max_stack = len(self.stack[var])
+        for i in range(max_stack):
+            row = [i]
+            for var in self.globs:
+                if i < len(self.stack[var]):
+                    row.append(f'{var}{sub(self.stack[var][i], self.is_ascii)}')
+                else:
+                    row.append(' - ')
+            table.append(row)
+        return table, columns

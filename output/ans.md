@@ -125,31 +125,31 @@ Exit-block:
 | is Global   | True | True | True    | True    | True | False |
 
 ```
-variable n:
-	WorkList : {}
-variable b:
-	WorkList : {A, E}
-	insert φ(*b) in F-block
-	WorkList : {A, E, F}
-	insert φ(*b) in B-block
-	WorkList : {A, B, E, F}
-variable k:
-	WorkList : {A, C, E}
-	insert φ(*k) in F-block
-	WorkList : {A, C, E, F}
-	insert φ(*k) in B-block
-	WorkList : {A, B, C, E, F}
 variable c:
 	WorkList : {A, C, E}
-	insert φ(*c) in F-block
+	insert phi(*c) in F-block
 	WorkList : {A, C, E, F}
-	insert φ(*c) in B-block
+	insert phi(*c) in B-block
 	WorkList : {A, B, C, E, F}
 variable a:
 	WorkList : {}
+variable n:
+	WorkList : {}
+variable k:
+	WorkList : {A, C, E}
+	insert phi(*k) in F-block
+	WorkList : {A, C, E, F}
+	insert phi(*k) in B-block
+	WorkList : {A, B, C, E, F}
+variable b:
+	WorkList : {A, E}
+	insert phi(*b) in F-block
+	WorkList : {A, E, F}
+	insert phi(*b) in B-block
+	WorkList : {A, B, E, F}
 ```
 
-### Needs a φ-function:
+### Needs a phi-function:
 
 | block =   | Entry   | A   | B   | C   | D   | E   | F   | G   | H   | Exit   |
 |:----------|:--------|:----|:----|:----|:----|:----|:----|:----|:----|:-------|
@@ -162,87 +162,127 @@ variable a:
 
 ```
 Rename(Entry):
-    no φ-functions
+    no phi-functions
     no instructions
     fill(A):
-        no φ-functions
+        no phi-functions
     Rename(A):
-        no φ-functions
+        no phi-functions
         rename instructions:
-            k₀ <-- n₀
-            b₀ <-- #1
-            c₀ <-- a₀
-            ifTrue k₀ = #0 goto L4
+            k_0 <-- n_0
+            b_0 <-- #1
+            c_0 <-- a_0
+            ifTrue k_0 = #0 goto L4
         fill(H):
-            no φ-functions
+            no phi-functions
         fill(B):
-            b₀ <-- φ(b₀)
-            c₀ <-- φ(c₀)
-            k₀ <-- φ(k₀)
+            b_0 <-- phi(b_0)
+            c_0 <-- phi(c_0)
+            k_0 <-- phi(k_0)
         Rename(H):
-            no φ-functions
+            no phi-functions
             rename instructions:
-                L4: return c₀
+                L4: return c_0
             fill(Exit):
-                no φ-functions
+                no phi-functions
             Rename(Exit):
-                no φ-functions
+                no phi-functions
                 no instructions
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+
                 clean();
                 return to H;
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+
             clean();
             return to A;
         Rename(B):
-            rename φ-functions:
-                b₁ <-- φ(b₀)
-                c₁ <-- φ(c₀)
-                k₁ <-- φ(k₀)
+            rename phi-functions:
+                b_1 <-- phi(b_0)
+                c_1 <-- phi(c_0)
+                k_1 <-- phi(k_0)
             rename instructions:
-                L1: t1 <-- %mod, k₁, #2
+                L1: t1 <-- %mod, k_1, #2
             fill(E):
-                no φ-functions
+                no phi-functions
             fill(C):
-                no φ-functions
+                no phi-functions
             Rename(C):
-                no φ-functions
+                no phi-functions
                 rename instructions:
-                    k₂ <-- %div, k₁, #2
-                    c₂ <-- *, c₁, c₁
+                    k_2 <-- %div, k_1, #2
+                    c_2 <-- *, c_1, c_1
                 fill(F):
-                    b₀ <-- φ(b₁)
-                    c₀ <-- φ(c₂)
-                    k₀ <-- φ(k₂)
+                    b_0 <-- phi(b_1)
+                    c_0 <-- phi(c_2)
+                    k_0 <-- phi(k_2)
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+|        1 | c_1 | -   | -   | k_1 | b_1 |
+|        2 | c_2 | -   | -   | k_2 | -   |
+
                 clean();
                 return to B;
             Rename(E):
-                no φ-functions
+                no phi-functions
                 rename instructions:
-                    L2: k₃ <-- -, k₁, #1
-                    k₄ <-- %div, k₃, #2
-                    c₃ <-- *, c₁, c₁
-                    b₂ <-- *, c₃, c₃
+                    L2: k_3 <-- -, k_1, #1
+                    k_4 <-- %div, k_3, #2
+                    c_3 <-- *, c_1, c_1
+                    b_2 <-- *, b_1, c_3
                 fill(F):
-                    b₀ <-- φ(b₁, b₂)
-                    c₀ <-- φ(c₂, c₃)
-                    k₀ <-- φ(k₂, k₄)
+                    b_0 <-- phi(b_1, b_2)
+                    c_0 <-- phi(c_2, c_3)
+                    k_0 <-- phi(k_2, k_4)
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+|        1 | c_1 | -   | -   | k_1 | b_1 |
+|        2 | c_3 | -   | -   | k_3 | b_2 |
+|        3 | -   | -   | -   | k_4 | -   |
+
                 clean();
                 return to B;
             Rename(F):
-                rename φ-functions:
-                    b₃ <-- φ(b₁, b₂)
-                    c₄ <-- φ(c₂, c₃)
-                    k₅ <-- φ(k₂, k₄)
+                rename phi-functions:
+                    b_3 <-- phi(b_1, b_2)
+                    c_4 <-- phi(c_2, c_3)
+                    k_5 <-- phi(k_2, k_4)
                 no instructions
                 fill(B):
-                    b₁ <-- φ(b₀, b₃)
-                    c₁ <-- φ(c₀, c₄)
-                    k₁ <-- φ(k₀, k₅)
+                    b_1 <-- phi(b_0, b_3)
+                    c_1 <-- phi(c_0, c_4)
+                    k_1 <-- phi(k_0, k_5)
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+|        1 | c_1 | -   | -   | k_1 | b_1 |
+|        2 | c_4 | -   | -   | k_5 | b_3 |
+
                 clean();
                 return to B;
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+|        1 | c_1 | -   | -   | k_1 | b_1 |
+
             clean();
             return to A;
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | c_0 | a_0 | n_0 | k_0 | b_0 |
+
         clean();
         return to Entry;
+|   vars = | c   | a   | n   | k   | b   |
+|---------:|:----|:----|:----|:----|:----|
+|        0 | -   | a_0 | n_0 | -   | -   |
+
     clean();
 ```
 
@@ -250,43 +290,43 @@ Rename(Entry):
 Entry
 
 Block A [4]
-(1) 	k₀ <-- n₀
-(2) 	b₀ <-- #1
-(3) 	c₀ <-- a₀
-(4) 	ifTrue k₀ = #0 goto L4
+(1) 	k_0 <-- n_0
+(2) 	b_0 <-- #1
+(3) 	c_0 <-- a_0
+(4) 	ifTrue k_0 = #0 goto L4
 
 Block B [5]
-(5) 	L1: b₁ <-- φ(b₀, b₃)
-(6) 	c₁ <-- φ(c₀, c₄)
-(7) 	k₁ <-- φ(k₀, k₅)
-(8) 	t1 <-- %mod, k₁, #2
+(5) 	L1: b_1 <-- phi(b_0, b_3)
+(6) 	c_1 <-- phi(c_0, c_4)
+(7) 	k_1 <-- phi(k_0, k_5)
+(8) 	t1 <-- %mod, k_1, #2
 (9) 	ifFalse t1 = #0 goto L2
 
 Block C [3]
-(10)	k₂ <-- %div, k₁, #2
-(11)	c₂ <-- *, c₁, c₁
+(10)	k_2 <-- %div, k_1, #2
+(11)	c_2 <-- *, c_1, c_1
 (12)	goto L3
 
 Block D [1]
 (13)	pass
 
 Block E [4]
-(14)	L2: k₃ <-- -, k₁, #1
-(15)	k₄ <-- %div, k₃, #2
-(16)	c₃ <-- *, c₁, c₁
-(17)	b₂ <-- *, c₃, c₃
+(14)	L2: k_3 <-- -, k_1, #1
+(15)	k_4 <-- %div, k_3, #2
+(16)	c_3 <-- *, c_1, c_1
+(17)	b_2 <-- *, b_1, c_3
 
 Block F [4]
-(18)	L3: b₃ <-- φ(b₁, b₂)
-(19)	c₄ <-- φ(c₂, c₃)
-(20)	k₅ <-- φ(k₂, k₄)
+(18)	L3: b_3 <-- phi(b_1, b_2)
+(19)	c_4 <-- phi(c_2, c_3)
+(20)	k_5 <-- phi(k_2, k_4)
 (21)	goto L1
 
 Block G [1]
 (22)	pass
 
 Block H [1]
-(23)	L4: return c₀
+(23)	L4: return c_0
 
 Exit
 ```
