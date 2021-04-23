@@ -1,5 +1,5 @@
 venv
+output/cfg
+output/dt
 # output
-# output/cfg
-# output/dt
-# input
+input

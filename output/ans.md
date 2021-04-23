@@ -62,9 +62,9 @@ Detached blocks : ```{D, G}```
 
 Global variables : ```{a, b, c, k, n}```
 
-| block =   | Entry   | A    | B                      | C    | D    | E    | F                      | G    | H    | Exit   |
-|:----------|:--------|:-----|:-----------------------|:-----|:-----|:-----|:-----------------------|:-----|:-----|:-------|
-| +         | None    | None | phi(b), phi(c), phi(k) | None | None | None | phi(b), phi(c), phi(k) | None | None | None   |
+| block =   | Entry   | A    | B                         | C    | D    | E    | F                         | G    | H    | Exit   |
+|:----------|:--------|:-----|:--------------------------|:-----|:-----|:-----|:--------------------------|:-----|:-----|:-------|
+| +         | None    | None | phi(*b), phi(*c), phi(*k) | None | None | None | phi(*b), phi(*c), phi(*k) | None | None | None   |
 
 ```
 Rename(Entry):
@@ -94,10 +94,10 @@ Rename(Entry):
             Rename(Exit):
                 no phi-functions
                 no instructions
-                    return to Exit;
                 clean();
                 return to H;
             clean();
+            return to A;
         Rename(B):
             rename phi-functions:
                 b₁ <-- phi(b₀)
@@ -118,8 +118,8 @@ Rename(Entry):
                     b₀ <-- phi(b₁)
                     c₀ <-- phi(c₂)
                     k₀ <-- phi(k₂)
-                    return to C;
                 clean();
+                return to B;
             Rename(E):
                 no phi-functions
                 rename instructions:
@@ -131,8 +131,8 @@ Rename(Entry):
                     b₀ <-- phi(b₁, b₂)
                     c₀ <-- phi(c₂, c₃)
                     k₀ <-- phi(k₂, k₄)
-                    return to E;
                 clean();
+                return to B;
             Rename(F):
                 rename phi-functions:
                     b₃ <-- phi(b₁, b₂)
@@ -143,7 +143,6 @@ Rename(Entry):
                     b₁ <-- phi(b₀, b₃)
                     c₁ <-- phi(c₀, c₄)
                     k₁ <-- phi(k₀, k₅)
-                    return to F;
                 clean();
                 return to B;
             clean();

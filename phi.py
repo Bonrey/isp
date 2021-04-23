@@ -22,6 +22,7 @@ class Phi:
         # print(self.phis)
         self.counter = {var: 0 for var in self.globs}
         self.stack = {var: [] for var in self.globs}
+        self.tab_str = " " * 4
         print("```")
         self.rename(0)
         print("```")
@@ -74,24 +75,24 @@ class Phi:
                         n += 1
                 item += 1
 
-    def rename(self, block, tabs=0):
-        new_block = []
-        tab_str = " " * 4
-        print(tabs * tab_str + f'Rename({self.nodes[block]}):')
+    def rename_phi(self, block, tabs):
         if not self.phis[block]:
-            print((tabs + 1) * tab_str + 'no phi-functions')
+            print((tabs + 1) * self.tab_str + 'no phi-functions')
         else:
-            print((tabs + 1) * tab_str + 'rename phi-functions:')
+            print((tabs + 1) * self.tab_str + 'rename phi-functions:')
             for phi in self.phis[block]:
                 self.phis[block][phi][0] = self.new_name(phi)
-                print((tabs + 2) * tab_str + show_phi(self.phis[block][phi], phi))
+                print((tabs + 2) * self.tab_str + show_phi(self.phis[block][phi], phi))
+
+    def rename_instructions(self, block, tabs):
+        new_block = []
         has_instructions = False
         for line in self.code_blocks[block]:
             used, changed, new_line = parse_vars(line)
             if used.union(changed).intersection(self.globs):
                 if not has_instructions:
                     has_instructions = True
-                    print((tabs + 1) * tab_str + 'rename instructions:')
+                    print((tabs + 1) * self.tab_str + 'rename instructions:')
                 for i in range(len(new_line)):
                     if type(new_line[i]) is list and not new_line[i][0]:
                         var = list(used)[new_line[i][1]]
@@ -113,7 +114,7 @@ class Phi:
                         if new_line[i][-1]:
                             var += ','
                         new_line[i] = var
-                print((tabs + 2) * tab_str + ' '.join(new_line))
+                print((tabs + 2) * self.tab_str + ' '.join(new_line))
             for i in range(len(new_line)):
                 if type(new_line[i]) is list and not new_line[i][0]:
                     var = list(used)[new_line[i][1]]
@@ -122,32 +123,32 @@ class Phi:
                     new_line[i] = var
             new_block.append(' '.join(new_line))
         if not has_instructions:
-            print((tabs + 1) * tab_str + 'no instructions')
+            print((tabs + 1) * self.tab_str + 'no instructions')
+        return new_block
+
+    def fill(self, successor, tabs):
+        print((tabs + 1) * self.tab_str + f'fill({self.nodes[successor]}):')
+        if not self.phis[successor]:
+            print((tabs + 2) * self.tab_str + 'no phi-functions')
+        else:
+            # print((tabs + 1) * tab_str + 'rename phi-functions')
+            for phi in self.phis[successor]:
+                if not self.stack[phi]:
+                    self.new_name(phi)
+                self.phis[successor][phi][1].append(self.stack[phi][-1])
+                print((tabs + 2) * self.tab_str + show_phi(self.phis[successor][phi], phi))
+
+    def rename(self, block, tabs=0):
+        new_block = []
+        print(tabs * self.tab_str + f'Rename({self.nodes[block]}):')
+        self.rename_phi(block, tabs)
+        new_block += self.rename_instructions(block, tabs)
         for successor in self.graph.edges[block]:
-            print((tabs + 1) * tab_str + f'fill({self.nodes[successor]}):')
-            if not self.phis[successor]:
-                print((tabs + 2) * tab_str + 'no phi-functions')
-            else:
-                # print((tabs + 1) * tab_str + 'rename phi-functions')
-                for phi in self.phis[successor]:
-                    if not self.stack[phi]:
-                        self.new_name(phi)
-                    self.phis[successor][phi][1].append(self.stack[phi][-1])
-                    print((tabs + 2) * tab_str + show_phi(self.phis[successor][phi], phi))
+            self.fill(successor, tabs)
         for successor in self.graph.dom_edges[block]:
             self.rename(successor, tabs + 1)
-        print((tabs + 2) * tab_str + f'return to {self.nodes[block]};')
-        print((tabs + 1) * tab_str + 'clean();')
-        for phi in self.phis[block]:
-            self.stack[phi].pop()
-        has_instructions = False
-        for line in self.code_blocks[block]:
-            used, changed, new_line = parse_vars(line)
-            if used or changed:
-                if not has_instructions:
-                    has_instructions = True
-                for var in changed.intersection(self.globs):
-                    self.stack[var].pop()
+            print((tabs + 2) * self.tab_str + f'return to {self.nodes[block]};')
+        self.clean(block, tabs)
         self.code_blocks[block] = new_block
 
     def add_phi(self):
@@ -168,8 +169,21 @@ class Phi:
         row = [" + "]
         for i in range(len(self.nodes)):
             if self.phi_args[i]:
-                row.append(', '.join(sorted([f"phi({phi_arg})" for phi_arg in self.phi_args[i]])))
+                row.append(', '.join(sorted([f"phi(*{phi_arg})" for phi_arg in self.phi_args[i]])))
             else:
                 row.append('None')
         table.append(row)
         return table, columns
+
+    def clean(self, block, tabs):
+        print((tabs + 1) * self.tab_str + 'clean();')
+        for phi in self.phis[block]:
+            self.stack[phi].pop()
+        has_instructions = False
+        for line in self.code_blocks[block]:
+            used, changed, new_line = parse_vars(line)
+            if used or changed:
+                if not has_instructions:
+                    has_instructions = True
+                for var in changed.intersection(self.globs):
+                    self.stack[var].pop()
