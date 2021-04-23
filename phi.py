@@ -53,12 +53,12 @@ class Phi:
                     for var in used:
                         if var not in def_block:
                             self.globs.add(var)
-                            show_set(self.globs, f"\tGlobals", True)
+                            show_set(self.globs, f"\t\tGlobals", True)
                     for var in changed:
                         def_block.add(var)
                         show_set(def_block, f"\t\tdef_{self.nodes[node]}", True)
                         self.blocks[var].add(node)
-                        show_set([self.nodes[block] for block in self.blocks[var]], f"\tBlocks({var})", True)
+                        show_set([self.nodes[block] for block in self.blocks[var]], f"\t\tBlocks({var})", True)
         print('```')
         print()
         columns = ["var ="] + sorted(self.blocks)

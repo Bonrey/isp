@@ -62,59 +62,59 @@ Entry-block:
 A-block:
 	def_A : {}
 	k <-- n
-	Globals : {n}
+		Globals : {n}
 		def_A : {k}
-	Blocks(k) : {A}
+		Blocks(k) : {A}
 	b <-- #1
 		def_A : {b, k}
-	Blocks(b) : {A}
+		Blocks(b) : {A}
 	c <-- a
-	Globals : {a, n}
+		Globals : {a, n}
 		def_A : {b, c, k}
-	Blocks(c) : {A}
+		Blocks(c) : {A}
 	ifTrue k = #0 goto L4
 B-block:
 	def_B : {}
 	L1: t1 <-- %mod, k, #2
-	Globals : {a, k, n}
+		Globals : {a, k, n}
 		def_B : {t1}
-	Blocks(t1) : {B}
+		Blocks(t1) : {B}
 	ifFalse t1 = #0 goto L2
 C-block:
 	def_C : {}
 	k <-- %div, k, #2
-	Globals : {a, k, n}
+		Globals : {a, k, n}
 		def_C : {k}
-	Blocks(k) : {A, C}
+		Blocks(k) : {A, C}
 	c <-- *, c, c
-	Globals : {a, c, k, n}
+		Globals : {a, c, k, n}
 		def_C : {c, k}
-	Blocks(c) : {A, C}
+		Blocks(c) : {A, C}
 	goto L3
 E-block:
 	def_E : {}
 	L2: k <-- -, k, #1
-	Globals : {a, c, k, n}
+		Globals : {a, c, k, n}
 		def_E : {k}
-	Blocks(k) : {A, C, E}
+		Blocks(k) : {A, C, E}
 	k <-- %div, k, #2
 		def_E : {k}
-	Blocks(k) : {A, C, E}
+		Blocks(k) : {A, C, E}
 	c <-- *, c, c
-	Globals : {a, c, k, n}
+		Globals : {a, c, k, n}
 		def_E : {c, k}
-	Blocks(c) : {A, C, E}
+		Blocks(c) : {A, C, E}
 	b <-- *, b, c
-	Globals : {a, b, c, k, n}
+		Globals : {a, b, c, k, n}
 		def_E : {b, c, k}
-	Blocks(b) : {A, E}
+		Blocks(b) : {A, E}
 F-block:
 	def_F : {}
 	L3: goto L1
 H-block:
 	def_H : {}
 	L4: return c
-	Globals : {a, b, c, k, n}
+		Globals : {a, b, c, k, n}
 Exit-block:
 	def_Exit : {}
 ```
@@ -125,21 +125,11 @@ Exit-block:
 | is Global   | True | True | True    | True    | True | False |
 
 ```
-variable n:
-	WorkList : {}
-variable a:
-	WorkList : {}
 variable c:
 	WorkList : {A, C, E}
 	insert phi(*c) in F-block
 	WorkList : {A, C, E, F}
 	insert phi(*c) in B-block
-	WorkList : {A, B, C, E, F}
-variable k:
-	WorkList : {A, C, E}
-	insert phi(*k) in F-block
-	WorkList : {A, C, E, F}
-	insert phi(*k) in B-block
 	WorkList : {A, B, C, E, F}
 variable b:
 	WorkList : {A, E}
@@ -147,6 +137,16 @@ variable b:
 	WorkList : {A, E, F}
 	insert phi(*b) in B-block
 	WorkList : {A, B, E, F}
+variable k:
+	WorkList : {A, C, E}
+	insert phi(*k) in F-block
+	WorkList : {A, C, E, F}
+	insert phi(*k) in B-block
+	WorkList : {A, B, C, E, F}
+variable a:
+	WorkList : {}
+variable n:
+	WorkList : {}
 ```
 
 ### Needs a phi-function:
@@ -220,7 +220,7 @@ Rename(Entry):
                     L2: k₃ <-- -, k₁, #1
                     k₄ <-- %div, k₃, #2
                     c₃ <-- *, c₁, c₁
-                    b₂ <-- *, b₁, c₃
+                    b₂ <-- *, c₃, c₃
                 fill(F):
                     b₀ <-- phi(b₁, b₂)
                     c₀ <-- phi(c₂, c₃)
@@ -274,7 +274,7 @@ Block E [4]
 (14)	L2: k₃ <-- -, k₁, #1
 (15)	k₄ <-- %div, k₃, #2
 (16)	c₃ <-- *, c₁, c₁
-(17)	b₂ <-- *, b₁, c₃
+(17)	b₂ <-- *, c₃, c₃
 
 Block F [4]
 (18)	L3: b₃ <-- phi(b₁, b₂)
