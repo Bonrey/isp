@@ -15,7 +15,7 @@ class Phi:
         self.blocks = {}
         show_table(self.globals_blocks())
         # show_set(self.globs, "Global variables")
-        self.phi_char = 'φ'  # "phi"
+        self.phi_char = "phi"  # 'φ'
         self.phi_args = [set() for _ in range(self.graph.N)]
         self.locate()
         show_table(self.table_new_phi())
@@ -68,17 +68,24 @@ class Phi:
         return table, columns
 
     def locate(self):
+        print('```')
         for var in self.globs:
+            print(f'variable {var}:')
             work_list = list(self.blocks[var])
+            show_set([self.nodes[block] for block in work_list], "\tWorkList", True)
             item = 0
             n = len(work_list)
             while item < n:
                 for df in self.graph.dfs[work_list[item]]:
-                    self.phi_args[df].add(var)
+                    if var not in self.phi_args[df]:
+                        print(f"\tinsert {self.phi_char}(*{var}) in {self.nodes[df]}-block")
+                        self.phi_args[df].add(var)
                     if df not in work_list:
                         work_list.append(df)
+                        show_set([self.nodes[block] for block in work_list], "\tWorkList", True)
                         n += 1
                 item += 1
+        print('```')
 
     def rename_phi(self, block, tabs):
         if not self.phis[block]:

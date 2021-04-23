@@ -158,9 +158,12 @@ def parse_vars(code_line):
     return used, changed, new_line
 
 
-def show_set(st, title):
-    print(title, ": ```{" + ', '.join(sorted(st)) + "}```")
-    print()
+def show_set(st, title, incode=False):
+    if incode:
+        print(title, ": {" + ', '.join(sorted(st)) + "}")
+    else:
+        print(title, ": ```{" + ', '.join(sorted(st)) + "}```")
+        print()
 
 
 def show_table(table):

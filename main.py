@@ -6,7 +6,7 @@ from some import *
 
 if __name__ == '__main__':
     input_file = "input/input_2.txt"
-    if len(sys.argv) > 0:
+    if len(sys.argv) > 1:
         input_file = sys.argv[1]
     out_dir = "output"
     if not os.path.exists(out_dir):
