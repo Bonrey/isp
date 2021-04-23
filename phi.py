@@ -38,10 +38,14 @@ class Phi:
         return idx
 
     def globals_blocks(self):
+        print('```')
         for node in range(len(self.nodes)):
             if self.graph.available[node]:
+                print(f'{self.nodes[node]}-block:')
                 def_block = set()
+                show_set(def_block, f"\tdef_{self.nodes[node]}", True)
                 for line in self.code_blocks[node]:
+                    print(f'\t{line}')
                     used, changed, _ = parse_vars(line)
                     for var in used.union(changed).difference(self.blocks.keys()):
                         if var not in self.blocks:
@@ -49,9 +53,14 @@ class Phi:
                     for var in used:
                         if var not in def_block:
                             self.globs.add(var)
+                            show_set(self.globs, f"\tGlobals", True)
                     for var in changed:
                         def_block.add(var)
+                        show_set(def_block, f"\t\tdef_{self.nodes[node]}", True)
                         self.blocks[var].add(node)
+                        show_set([self.nodes[block] for block in self.blocks[var]], f"\tBlocks({var})", True)
+        print('```')
+        print()
         columns = ["var ="] + sorted(self.blocks)
         table = []
         row = ["Blocks(var)"]
@@ -86,6 +95,7 @@ class Phi:
                         n += 1
                 item += 1
         print('```')
+        print()
 
     def rename_phi(self, block, tabs):
         if not self.phis[block]:

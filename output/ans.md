@@ -56,12 +56,79 @@ Detached blocks : ```{D, G}```
 | Idom(node) | None    | Entry    | A           | B              | B              | B              | A           | H                 |
 | DF(node)   | None    | None     | B           | F              | F              | B              | None        | None              |
 
+```
+Entry-block:
+	def_Entry : {}
+A-block:
+	def_A : {}
+	k <-- n
+	Globals : {n}
+		def_A : {k}
+	Blocks(k) : {A}
+	b <-- #1
+		def_A : {b, k}
+	Blocks(b) : {A}
+	c <-- a
+	Globals : {a, n}
+		def_A : {b, c, k}
+	Blocks(c) : {A}
+	ifTrue k = #0 goto L4
+B-block:
+	def_B : {}
+	L1: t1 <-- %mod, k, #2
+	Globals : {a, k, n}
+		def_B : {t1}
+	Blocks(t1) : {B}
+	ifFalse t1 = #0 goto L2
+C-block:
+	def_C : {}
+	k <-- %div, k, #2
+	Globals : {a, k, n}
+		def_C : {k}
+	Blocks(k) : {A, C}
+	c <-- *, c, c
+	Globals : {a, c, k, n}
+		def_C : {c, k}
+	Blocks(c) : {A, C}
+	goto L3
+E-block:
+	def_E : {}
+	L2: k <-- -, k, #1
+	Globals : {a, c, k, n}
+		def_E : {k}
+	Blocks(k) : {A, C, E}
+	k <-- %div, k, #2
+		def_E : {k}
+	Blocks(k) : {A, C, E}
+	c <-- *, c, c
+	Globals : {a, c, k, n}
+		def_E : {c, k}
+	Blocks(c) : {A, C, E}
+	b <-- *, b, c
+	Globals : {a, b, c, k, n}
+		def_E : {b, c, k}
+	Blocks(b) : {A, E}
+F-block:
+	def_F : {}
+	L3: goto L1
+H-block:
+	def_H : {}
+	L4: return c
+	Globals : {a, b, c, k, n}
+Exit-block:
+	def_Exit : {}
+```
+
 | var =       | a    | b    | c       | k       | n    | t1    |
 |:------------|:-----|:-----|:--------|:--------|:-----|:------|
 | Blocks(var) | None | A, E | A, C, E | A, C, E | None | B     |
 | is Global   | True | True | True    | True    | True | False |
 
 ```
+variable n:
+	WorkList : {}
+variable a:
+	WorkList : {}
 variable c:
 	WorkList : {A, C, E}
 	insert phi(*c) in F-block
@@ -74,17 +141,14 @@ variable k:
 	WorkList : {A, C, E, F}
 	insert phi(*k) in B-block
 	WorkList : {A, B, C, E, F}
-variable a:
-	WorkList : {}
 variable b:
 	WorkList : {A, E}
 	insert phi(*b) in F-block
 	WorkList : {A, E, F}
 	insert phi(*b) in B-block
 	WorkList : {A, B, E, F}
-variable n:
-	WorkList : {}
 ```
+
 ### Needs a phi-function:
 
 | block =   | Entry   | A   | B   | C   | D   | E   | F   | G   | H   | Exit   |
