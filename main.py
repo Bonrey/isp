@@ -5,7 +5,7 @@ from phi import Phi
 from some import *
 
 if __name__ == '__main__':
-    input_file = "input/input_2.txt"
+    input_file = "input/input_3.txt"
     is_ascii = False
     if len(sys.argv) > 1:
         input_file = sys.argv[1]
